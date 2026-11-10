@@ -253,8 +253,16 @@ function trim(x, y, S){
   s.animate(kf,{duration:1500,easing:'linear'}).finished.then(()=>s.remove());
 }
 
-function carregar(){ try{ const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v.filter(id=>BY[id]) : []; }catch{ return []; } }
-function salvar(){ try{ localStorage.setItem(KEY, JSON.stringify(album)); }catch{} }
+// Guarda em localStorage E cookie: navegador interno de alguns apps (leitor NFC, WebView) bloqueia o localStorage.
+const lerCookie = () => decodeURIComponent((document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)')) || [])[1] || '');
+function carregar(){
+  let v = []; try{ v = JSON.parse(localStorage.getItem(KEY)) || []; }catch{}
+  return [...new Set([...(Array.isArray(v) ? v : []), ...lerCookie().split('.')])].filter(id=>BY[id]);
+}
+function salvar(){
+  try{ localStorage.setItem(KEY, JSON.stringify(album)); }catch{}
+  document.cookie = `${KEY}=${album.join('.')};max-age=${60*60*24*400};path=/;SameSite=Lax`;
+}
 let album = carregar();
 // Cada NFC abre uma aba nova: sempre relê o que está salvo antes de somar, senão uma aba antiga sobrescreve a coleção.
 function adicionar(id){ album = carregar(); if (!album.includes(id)) album.push(id); salvar(); }
