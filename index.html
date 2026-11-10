@@ -256,6 +256,11 @@ function trim(x, y, S){
 function carregar(){ try{ const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v.filter(id=>BY[id]) : []; }catch{ return []; } }
 function salvar(){ try{ localStorage.setItem(KEY, JSON.stringify(album)); }catch{} }
 let album = carregar();
+// Cada NFC abre uma aba nova: sempre relê o que está salvo antes de somar, senão uma aba antiga sobrescreve a coleção.
+function adicionar(id){ album = carregar(); if (!album.includes(id)) album.push(id); salvar(); }
+function sincronizar(){ if (!$('fx').hidden) return; album = carregar(); desenharAlbum(); atualizarPlacar(false); }
+addEventListener('storage', e => { if (e.key === KEY) sincronizar(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(); });
 
 /* ---------- álbum ---------- */
 function desenharAlbum(){
@@ -468,7 +473,9 @@ const ENTRADAS = {
 
 /* ---------- sequência completa ao escanear ---------- */
 async function revelar(p){
+  album = carregar(); desenharAlbum(); atualizarPlacar(false);   // estado real deste celular
   const nova = !album.includes(p.id);
+  if (nova) adicionar(p.id);   // grava já: fechar a aba no meio da animação não perde a peça
   const fx = $('fx'), palco = $('palco'), giro = $('giro'), texto = $('texto');
 
   giro.innerHTML = `<div class="face">${frenteHTML(p.id)}</div><div class="face verso">${icone(p.id + '-verso')}</div>`;
@@ -526,7 +533,7 @@ async function revelar(p){
   ],{duration:RM?500:1100, easing:'cubic-bezier(.55,0,.25,1)', fill:'forwards'}).finished;
 
   // encaixe
-  if (nova){ album.push(p.id); salvar(); slot.classList.replace('locked','got'); }
+  if (nova){ adicionar(p.id); slot.classList.replace('locked','got'); }
   slot.classList.remove('land','ping'); void slot.offsetWidth;
   slot.classList.add(nova ? 'land' : 'ping');
   const cx = para.left+para.width/2, cy = para.top+para.height/2;
