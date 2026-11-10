@@ -186,9 +186,7 @@ main{max-width:1000px;margin:0 auto;padding-block:12px 48px;
   <section class="album" id="album"></section>
 
   <p class="rodape" id="rodape"></p>
-  <button class="reset" id="reset" type="button">Reiniciar álbum</button>
-  <p id="diag" style="font-size:10px;color:#666;text-align:center;margin-top:10px;word-break:break-word"></p>
-</main>
+  <button class="reset" id="reset" type="button">Reiniciar álbum</button></main>
 
 <div class="fx" id="fx" hidden>
   <div class="fx-bg" id="fxbg"></div>
@@ -632,20 +630,6 @@ if (BY[q]){
   history.replaceState(null, '', location.pathname); // recarregar a página não repete a animação
   revelar(BY[q]);
 }
-
-// ponytail: diagnóstico TEMPORÁRIO — se o "#id" muda a cada NFC, o navegador está abrindo sem memória (anônimo/app). Remover depois.
-(async () => {
-  let id = ''; try{ id = localStorage.getItem('arist-id') || ''; }catch{}
-  id = id || (document.cookie.match(/(?:^|; )arist-id=(\w+)/) || [])[1] || Math.random().toString(36).slice(2,6);
-  try{ localStorage.setItem('arist-id', id); }catch{}
-  document.cookie = `arist-id=${id};max-age=34560000;path=/;SameSite=Lax`;
-  let ls = 'ok'; try{ localStorage.setItem('t','1'); localStorage.removeItem('t'); }catch{ ls = 'bloqueado'; }
-  const ua = navigator.userAgent;
-  const nav = /FBAN|FBAV|Instagram|WhatsApp|Line\//.test(ua) ? 'app' : /; wv\)/.test(ua) ? 'webview' : /SamsungBrowser/.test(ua) ? 'Samsung'
-            : /CriOS|Chrome/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'outro';
-  let mb = '?'; try{ mb = Math.round((await navigator.storage.estimate()).quota / 1e6); }catch{}
-  $('diag').textContent = `diag v4 · navegador #${id} · ${nav} · ${/iPhone|iPad/.test(ua)?'iOS':/Android/.test(ua)?'Android':'PC'} · armaz. ${ls} · cookie ${navigator.cookieEnabled?'ok':'bloqueado'} · ${mb}MB · salvo: ${carregar().join(', ') || 'nada'}`;
-})();
 </script>
 </body>
 </html>
