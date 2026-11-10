@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>A Aristocracia do Tempo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Álbum escuro com peças preto + dourado; animações em camada fixa por cima */
+:root{
+  --bg:#1b1b1b; --ink:#ededed; --mute:#9a9a9a; --line:#2e2e2e;
+  --gold:#f2b632; --gold-hi:#ffe08a; --gold-lo:#8a5e0c;
+  --display:"Playfair Display",Georgia,"Times New Roman",serif;
+  --body:Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --S:min(84vw, 50vh, 540px); /* tamanho da peça na animação */
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);min-height:100vh;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(ellipse at 50% 0,#262626,var(--bg) 70%) fixed}
+img{-webkit-user-drag:none;user-select:none}
+main{max-width:1000px;margin:0 auto;padding-block:12px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- topo ---------- */
+.titulo{background:#000;border:3px solid #fff;border-radius:14px;text-align:center;padding:18px 12px 14px;
+  font-family:var(--display);font-weight:900;line-height:.92;letter-spacing:-.02em;font-size:clamp(36px,9vw,64px)}
+.titulo span{display:block}
+.ouro{color:var(--gold);background:linear-gradient(100deg,var(--gold) 40%,#fff6cf 50%,var(--gold) 60%) 200% 0/250% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brilho 6s linear infinite}
+/* fundo de 250% repetido: andar -166.667% = exatamente 1 ladrilho → loop sem emenda e sem pausa (o feixe nunca fica parado) */
+@keyframes brilho{from{background-position:0 0}to{background-position:-166.667% 0}}
+.intro{text-align:center;color:var(--mute);font-size:14px;line-height:1.55;margin:20px auto 30px;max-width:420px}
+
+.placar{display:flex;align-items:baseline;gap:8px;font-family:var(--display);font-weight:900;font-size:32px}
+.placar .n{color:var(--gold);display:inline-block;min-width:.6em}
+.placar small{font-family:var(--body);font-weight:400;font-size:14px;color:var(--mute)}
+.barra{height:5px;background:var(--line);border-radius:5px;margin:10px 0 22px;overflow:hidden}
+.barra i{display:block;height:100%;width:0;border-radius:5px;transition:width 1s cubic-bezier(.3,1.3,.5,1);
+  background:linear-gradient(90deg,var(--gold-lo),var(--gold),var(--gold-hi),var(--gold));background-size:200% 100%;animation:fluir 2s linear infinite}
+@keyframes fluir{to{background-position:-200% 0}}
+
+/* ---------- álbum ---------- */
+.album{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:640px){.album{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+.slot{position:relative;border:1px solid #6b4a0e;border-radius:10px;padding:12px 10px 14px;text-align:center;overflow:hidden;
+  background:repeating-linear-gradient(135deg,#232323 0 8px,#1f1f1f 8px 16px)}
+.slot .num{position:absolute;left:10px;top:9px;font-size:10px;font-weight:600;color:#666;letter-spacing:.08em}
+.slot .ico{width:min(100%,150px);aspect-ratio:1;margin:8px auto 6px}
+.slot .ico img{width:100%;height:100%;display:block;object-fit:contain}
+.slot h3{font-size:13px;font-weight:600;color:#666}
+.slot small{font-size:10px;color:#555;letter-spacing:.05em}
+.slot.locked .ico img{filter:brightness(0);opacity:.5}
+.slot.got{border-color:var(--gold);background:radial-gradient(circle at 50% 42%,rgba(242,182,50,.22),transparent 65%),#1d1a12;
+  box-shadow:0 0 0 1px rgba(242,182,50,.25),0 10px 30px -12px rgba(242,182,50,.45)}
+.slot.got .ico{animation:flutua 4s ease-in-out infinite}
+.slot.got .num{color:var(--gold)}
+.slot.got h3{color:var(--gold-hi)}
+.slot.got small{color:var(--gold)}
+.slot.got::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,240,190,.16) 50%,transparent 60%) 0 0/250% 100%;animation:brilho 5s linear infinite}
+.slot:nth-child(2n)::after{animation-delay:-1.7s}.slot:nth-child(3n)::after{animation-delay:-3.3s}
+@keyframes flutua{50%{transform:translateY(-5px)}}
+.slot.land{animation:pousa .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pousa{0%{transform:scale(.92)}40%{transform:scale(1.06);box-shadow:0 0 0 2px var(--gold-hi),0 0 60px rgba(242,182,50,.8)}100%{transform:none}}
+.slot.ping{animation:ping .8s ease}
+@keyframes ping{40%{box-shadow:0 0 0 3px var(--gold-hi),0 0 40px rgba(242,182,50,.7)}}
+
+.completo{display:none;margin:0 0 20px;padding:18px;border-radius:12px;text-align:center;border:1px solid var(--gold);
+  background:linear-gradient(180deg,rgba(242,182,50,.16),rgba(242,182,50,.04))}
+.completo b{display:block;font-family:var(--display);font-size:26px;color:var(--gold-hi)}
+.completo span{color:var(--mute);font-size:14px}
+.cheio .completo{display:block}
+.rodape{border-top:1px solid var(--line);margin-top:24px;padding-top:20px;text-align:center;color:var(--mute);font-size:14px;line-height:1.5}
+.reset{display:block;margin:24px auto 0;padding:8px;background:none;border:0;color:#666;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+
+/* ---------- animação de registro ---------- */
+.fx{position:fixed;inset:0;z-index:50;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none}
+.fx-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,#3a2a08 0,#120d03 40%,#000 78%)}
+.cena{position:absolute;inset:0}
+.raios{position:absolute;left:50%;top:40%;width:200vmax;height:200vmax;margin:-100vmax 0 0 -100vmax;pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle,#000 0,transparent 45%);mask-image:radial-gradient(circle,#000 0,transparent 45%)}
+.raios i{position:absolute;inset:0;animation:gira 30s linear infinite;
+  background:repeating-conic-gradient(rgba(255,205,80,.2) 0 5deg,transparent 5deg 15deg)}
+@keyframes gira{to{transform:rotate(360deg)}}
+.halo{position:absolute;left:50%;top:40%;width:var(--S);height:var(--S);margin:calc(var(--S)/-2) 0 0 calc(var(--S)/-2);
+  border-radius:50%;background:radial-gradient(circle,rgba(255,200,70,.55),transparent 62%);animation:pulsa 2.4s ease-in-out infinite}
+@keyframes pulsa{50%{transform:scale(1.15);opacity:.7}}
+.palco{position:absolute;left:50%;top:40%;width:var(--S);height:var(--S);margin:calc(var(--S)/-2) 0 0 calc(var(--S)/-2);perspective:1200px;will-change:transform,opacity}
+.giro{position:absolute;inset:0;will-change:transform;transform-style:preserve-3d}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.verso{transform:rotateY(180deg)} /* verso real: moldura preta + tampa do NFC (img/*-verso.webp, gerado dos STLs da revisão 09) */
+.giro img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6))}
+.reflexo{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;
+  -webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;
+  background:linear-gradient(110deg,transparent 38%,rgba(255,250,225,.95) 50%,transparent 62%) 160% 0/260% 100% no-repeat;animation:varre 2.6s ease-in-out infinite}
+@keyframes varre{0%,25%{background-position:160% 0}100%{background-position:-60% 0}}
+.texto{position:absolute;left:0;right:0;top:calc(40% + var(--S)/2 + 6px);text-align:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.texto small{display:block;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);opacity:0;transform:translateY(8px);transition:.6s .1s}
+.nome{font-family:var(--display);font-weight:900;font-size:clamp(32px,9vw,64px);line-height:1.05;text-wrap:balance;
+  color:var(--gold-hi);text-shadow:0 0 28px rgba(242,182,50,.6),0 2px 0 var(--gold-lo);margin-top:6px}
+.nome .w{display:inline-block;white-space:nowrap} /* quebra só entre palavras: "Bomba-relógio" nunca vira "reló/gio" */
+.nome i{font-style:normal;display:inline-block;opacity:0;transform:translateY(.6em) scale(.6);
+  transition:opacity .4s,transform .6s cubic-bezier(.3,1.6,.5,1);transition-delay:calc(var(--i)*40ms + .15s)}
+.texto p{color:#bba36a;font-size:14px;margin-top:8px;opacity:0;transition:.6s .8s}
+.texto.show small,.texto.show p,.texto.show .nome i{opacity:1;transform:none}
+.giro .dardo{position:absolute;inset:0;will-change:transform}
+.timer{position:absolute;left:0;right:0;top:calc(40% + var(--S)/2 + 8px);text-align:center;font-family:var(--display);font-weight:900;
+  font-size:clamp(44px,12vw,76px);font-variant-numeric:tabular-nums;color:var(--gold-hi);text-shadow:0 0 24px rgba(242,182,50,.6)}
+.timer.zero{color:#ff6a3d;text-shadow:0 0 30px rgba(255,90,40,.85);animation:pisca .3s steps(2,jump-none) infinite}
+.trim{position:absolute;left:0;top:0;white-space:nowrap;font-family:var(--display);font-weight:900;font-size:clamp(28px,8vw,56px);
+  color:var(--gold-hi);text-shadow:0 0 18px rgba(242,182,50,.8),0 3px 0 var(--gold-lo)}
+.dica{position:absolute;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;
+  letter-spacing:.2em;text-transform:uppercase;color:#a08a55;opacity:0;transition:opacity .5s}
+.dica.show{opacity:1;animation:pisca 1.6s ease-in-out infinite}
+@keyframes pisca{50%{opacity:.35}}
+.aperta{position:absolute;width:10%;aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(circle,rgba(255,232,140,1) 0 30%,rgba(246,188,52,.8) 50%,transparent 72%)}
+.flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 40%,#fff8de,#f2b632 60%,#7a4d00)}
+
+.camada-fx{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+.pt{position:absolute;left:0;top:0;will-change:transform,opacity}
+.pt.conf{width:9px;height:15px;border-radius:2px}
+.pt.faisca{width:7px;height:7px;border-radius:50%;box-shadow:0 0 10px 3px rgba(255,210,90,.9)}
+.pt.estrela{width:22px;height:22px;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+.pt.anel{border:3px solid var(--gold-hi);border-radius:50%;box-shadow:0 0 24px rgba(242,182,50,.8),inset 0 0 24px rgba(242,182,50,.5)}
+.voo{position:fixed;z-index:55;transform-origin:0 0;pointer-events:none;will-change:transform}
+.voo img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 0 16px rgba(242,182,50,.7))}
+
+/* ---------- parabéns (coleção completa) ---------- */
+.parabens{position:fixed;inset:0;z-index:65;overflow:hidden;cursor:pointer;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(circle at 50% 45%,#4a3409,#140e03 50%,#000 85%);
+  padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.parabens .raios{top:45%}
+.pb{position:relative;width:100%;max-width:1100px}
+.pb small{display:block;font-size:clamp(12px,3.2vw,16px);letter-spacing:.35em;text-transform:uppercase;color:var(--gold)}
+.pb h2{font-family:var(--display);font-weight:900;font-size:clamp(60px,19vw,230px);line-height:.95;letter-spacing:-.02em;margin:.12em 0 .08em;white-space:nowrap}
+.pb h2 span{display:inline-block;color:var(--gold-hi);text-shadow:0 0 40px rgba(242,182,50,.7),0 4px 0 var(--gold-lo),0 8px 30px rgba(0,0,0,.6)}
+.pb p{font-size:clamp(15px,4vw,22px);line-height:1.45;color:#e9dcb8;max-width:30ch;margin:0 auto}
+.pb p b{font-family:var(--display);color:var(--gold-hi);font-weight:900}
+.pb-pecas{display:flex;justify-content:center;gap:clamp(4px,1.5vw,16px);margin:clamp(18px,4vh,36px) auto 0;max-width:720px}
+.pb-pecas img{width:clamp(44px,13vw,104px);aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
+.pb-dica{display:block;margin-top:clamp(18px,4vh,34px);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#a08a55;opacity:0;transition:opacity .6s}
+.pb-dica.show{opacity:1;animation:pisca 1.6s ease-in-out infinite}
+@keyframes onda{0%,100%{transform:translateY(0)}50%{transform:translateY(-.06em)}}
+
+/* ---------- painel de demonstração ---------- */
+.demo{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(14,13,10,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-top:1px solid #4a3608;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px))}
+.demo>span{display:block;max-width:1000px;margin:0 auto 8px;padding:0 max(16px,env(safe-area-inset-left,0px));font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#a08850}
+.demo-row{display:flex;gap:8px;max-width:1000px;margin:0 auto;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) 2px max(16px,env(safe-area-inset-left,0px))}
+.demo-row::-webkit-scrollbar{display:none}
+@media (min-width:900px){.demo-row{flex-wrap:wrap}}
+.demo button{flex:none;display:flex;align-items:center;gap:6px;min-height:44px;padding:5px 14px 5px 6px;border-radius:999px;border:1px solid #6b4a0e;background:#1d1a12;
+  color:var(--gold-hi);font:600 13px var(--body);cursor:pointer;transition:background .2s,transform .1s}
+.demo button:hover{background:#2a2414}
+.demo button:active{transform:scale(.96)}
+.demo button:focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px}
+.demo button img{width:32px;height:32px;object-fit:contain}
+.demo .esp{background:var(--gold);border-color:var(--gold);color:#141005;padding-left:14px}
+.demo .esp:hover{background:var(--gold-hi)}
+.demo .leve{background:none;color:#8a8a8a;border-color:#3a3a3a;padding-left:14px}
+.demo.ocupado button{opacity:.4;pointer-events:none}
+.com-demo main{padding-bottom:120px}
+
+@media (prefers-reduced-motion:reduce){.raios i,.halo,.slot.got .ico,.ouro,.slot.got::after,.reflexo{animation:none}}
+</style>
+</head>
+<body>
+
+<main>
+  <h1 class="titulo"><span>A Aristocracia</span><span class="ouro">do Tempo</span></h1>
+  <p class="intro">Seis peças douradas circulam entre os avaliadores.<br>Encoste o celular em uma delas para registrá-la aqui.</p>
+
+  <div class="placar"><span class="n" id="cnt">0</span> de 6 <small>peças douradas</small></div>
+  <div class="barra"><i id="barra"></i></div>
+
+  <div class="completo"><b>Álbum completo!</b><span>Você reuniu as seis peças douradas da Aristocracia do Tempo.</span></div>
+  <section class="album" id="album"></section>
+
+  <p class="rodape" id="rodape"></p>
+  <button class="reset" id="reset" type="button">Reiniciar álbum</button>
+</main>
+
+<div class="fx" id="fx" hidden>
+  <div class="fx-bg" id="fxbg"></div>
+  <div class="cena" id="cena">
+    <div class="raios" id="raios"><i></i></div>
+    <div class="halo" id="halo"></div>
+    <div class="palco" id="palco"><div class="giro" id="giro"></div></div>
+  </div>
+  <div class="texto" id="texto"><small id="tag"></small><h2 class="nome" id="nome"></h2><p id="sub"></p></div>
+  <div class="timer" id="timer" hidden>00:03</div>
+  <p class="dica" id="dica">toque para guardar no álbum</p>
+  <div class="flash" id="flash"></div>
+</div>
+
+<div class="parabens" id="parabens" hidden>
+  <div class="raios"><i></i></div>
+  <div class="pb">
+    <small>Coleção completa</small>
+    <h2 id="pbTitulo" aria-label="Parabéns!"></h2>
+    <p>Você reuniu as seis peças douradas de <b>A Aristocracia do Tempo</b></p>
+    <div class="pb-pecas" id="pbPecas"></div>
+    <span class="pb-dica" id="pbDica">toque para ver seu álbum</span>
+  </div>
+</div>
+
+<div class="camada-fx" id="camada"></div>
+<nav class="demo" id="demo" hidden aria-label="Demonstração das animações">
+  <span>Demonstração · toque numa conquista</span>
+  <div class="demo-row"></div>
+</nav>
+
+<script>
+// Cada chaveiro dourado tem um adesivo NFC com o link: SITE/?p=<id>
+const PECAS = [
+  {id:'trofeu',   nome:'Troféu',        g:'Dourado', fx:'sobe'},
+  {id:'medalha',  nome:'Medalha',       g:'Dourada', fx:'pendulo'},
+  {id:'bomba',    nome:'Bomba-relógio', g:'Dourada', fx:'explode'},
+  {id:'alvo',     nome:'Alvo',          g:'Dourado', fx:'flecha'},
+  {id:'coroa',    nome:'Coroa',         g:'Dourada', fx:'desce'},
+  {id:'controle', nome:'Controle',      g:'Dourado', fx:'joystick'},
+];
+const BY = Object.fromEntries(PECAS.map((p,i)=>[p.id,{...p,i}]));
+const KEY = 'aristocracia-album-v1';
+const $ = id => document.getElementById(id);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CEL = Math.min(innerWidth, innerHeight) < 600;   // menos partículas no celular
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const frame = () => new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+const rnd = (a,b) => a + Math.random()*(b-a);
+const OUROS = ['#ffe08a','#f6c845','#d69c18','#fff4cc','#b8860b','#ffffff'];
+const src = id => `img/${id}.webp`;
+const icone = id => `<img src="${src(id)}" alt="" draggable="false" decoding="async">`;
+const frenteHTML = id => `${icone(id)}<i class="reflexo" style="-webkit-mask-image:url(${src(id)});mask-image:url(${src(id)})"></i>`;
+// "TRIIIM!" do despertador
+function trim(x, y, S){
+  const s = document.createElement('span');
+  s.className = 'trim'; s.textContent = 'TRIIIM!';
+  $('camada').appendChild(s);
+  const kf = [{transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(0) rotate(-14deg)`,opacity:0},
+              {transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(1.15) rotate(-8deg)`,opacity:1,offset:.12}];
+  for (let k=0;k<10;k++) kf.push({transform:`translate(${x+rnd(-5,5)}px,${y+rnd(-4,4)}px) translate(-50%,-50%) scale(1) rotate(${k%2?-11:-5}deg)`,opacity:1,offset:.15+k*.07});
+  kf.push({transform:`translate(${x}px,${y-20}px) translate(-50%,-50%) scale(1.3) rotate(-8deg)`,opacity:0});
+  s.animate(kf,{duration:1500,easing:'linear'}).finished.then(()=>s.remove());
+}
+
+function carregar(){ try{ const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v.filter(id=>BY[id]) : []; }catch{ return []; } }
+function salvar(){ try{ localStorage.setItem(KEY, JSON.stringify(album)); }catch{} }
+let album = carregar();
+
+/* ---------- álbum ---------- */
+function desenharAlbum(){
+  $('album').innerHTML = PECAS.map((p,i)=>`
+    <article class="slot ${album.includes(p.id)?'got':'locked'}" data-id="${p.id}">
+      <span class="num">0${i+1}</span>
+      <div class="ico">${icone(p.id)}</div>
+      <h3>${p.nome}</h3><small>${p.g}</small>
+    </article>`).join('');
+}
+function textoRodape(){
+  const f = 6 - album.length;
+  return album.length === 0 ? 'Nenhuma peça registrada ainda. As douradas estão divididas entre os quatro avaliadores, então vale trocar.'
+       : f === 0 ? 'Todas as peças douradas registradas. O tempo agora é seu.'
+       : `Falta${f>1?'m':''} ${f} peça${f>1?'s':''}. Troque chaveiros com os outros avaliadores para completar.`;
+}
+async function atualizarPlacar(animar){
+  const n = album.length, el = $('cnt');
+  $('barra').style.width = (n/6*100) + '%';
+  $('rodape').textContent = textoRodape();
+  document.body.classList.toggle('cheio', n === 6);
+  if (!animar || RM){ el.textContent = n; return; }
+  await el.animate([{transform:'none',opacity:1},{transform:'translateY(-70%)',opacity:0}],{duration:180,easing:'ease-in'}).finished;
+  el.textContent = n;
+  el.animate([{transform:'translateY(70%) scale(1.6)',opacity:0},{transform:'scale(1.4)',opacity:1,offset:.5},{transform:'none',opacity:1}],
+             {duration:700,easing:'cubic-bezier(.3,1.6,.5,1)'});
+}
+
+/* ---------- partículas ---------- */
+function particulas(n, x, y, o){
+  const camada = $('camada');
+  n = Math.round(n * (CEL ? .55 : 1));
+  for (let k=0;k<n;k++){
+    const s = document.createElement('span');
+    s.className = 'pt ' + o.tipo;
+    s.style.background = OUROS[k % OUROS.length];
+    camada.appendChild(s);
+    const ang = rnd(0, Math.PI*2), d = rnd(o.dist*.35, o.dist);
+    const dx = Math.cos(ang)*d, dy = Math.sin(ang)*d - (o.sobe||0);
+    const rot = rnd(-720,720), sc = rnd(.5,1.2);
+    s.animate([
+      {transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(${sc})`, opacity:1},
+      {transform:`translate(${x+dx}px,${y+dy}px) translate(-50%,-50%) rotate(${rot*.6}deg) scale(${sc})`, opacity:1, offset:.6},
+      {transform:`translate(${x+dx*1.1}px,${y+dy+(o.queda||0)}px) translate(-50%,-50%) rotate(${rot}deg) scale(${sc*.6})`, opacity:0}
+    ],{duration:rnd(o.dur*.6,o.dur), easing:'cubic-bezier(.1,.7,.3,1)', delay:rnd(0,o.atraso||0), fill:'backwards'}).finished.then(()=>s.remove());
+  }
+}
+function estrelas(n, cx, cy, raio, dur){
+  n = Math.round(n * (CEL ? .6 : 1));
+  for (let k=0;k<n;k++){
+    const s = document.createElement('span');
+    s.className = 'pt estrela'; s.style.background = k%3 ? '#ffe08a' : '#fff'; s.style.opacity = 0;
+    $('camada').appendChild(s);
+    const a = rnd(0,Math.PI*2), r = rnd(raio*.4, raio), x = cx+Math.cos(a)*r, y = cy+Math.sin(a)*r;
+    s.animate([{transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(0) rotate(0)`,opacity:0},
+               {transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(${rnd(.6,1.4)}) rotate(90deg)`,opacity:1,offset:.5},
+               {transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(0) rotate(180deg)`,opacity:0}],
+      {duration:rnd(600,1100), delay:rnd(0,dur), easing:'ease-in-out'}).finished.then(()=>s.remove());
+  }
+}
+function aneis(n, cx, cy, tam){
+  for (let k=0;k<n;k++){
+    const s = document.createElement('span');
+    s.className = 'pt anel'; s.style.width = s.style.height = tam+'px'; s.style.opacity = 0;
+    $('camada').appendChild(s);
+    s.animate([{transform:`translate(${cx}px,${cy}px) translate(-50%,-50%) scale(.2)`,opacity:1},
+               {transform:`translate(${cx}px,${cy}px) translate(-50%,-50%) scale(2.6)`,opacity:0}],
+      {duration:900, delay:k*140, easing:'cubic-bezier(.2,.8,.3,1)'}).finished.then(()=>s.remove());
+  }
+}
+// treme só a cena (raios + peça); o fundo fica parado, então as bordas da tela nunca aparecem
+function tremer(amp, dur){
+  const kf = []; for (let k=0;k<8;k++) kf.push({transform:`translate(${rnd(-amp,amp)}px,${rnd(-amp,amp)}px)`});
+  kf.push({transform:'translate(0,0)'});
+  $('cena').animate(kf,{duration:dur,easing:'linear'});
+}
+function centroPalco(){ const r = $('palco').getBoundingClientRect(); return [r.left+r.width/2, r.top+r.height/2, r.width]; }
+// começa a animação já no 1º quadro (fill backwards) e só então mostra a peça: sem "piscar" na posição final
+function entra(el, kf, o){ const a = el.animate(kf, {fill:'backwards', ...o}); el.style.opacity = ''; return a.finished; }
+
+/* ---------- entradas: uma animação diferente para cada peça ---------- */
+const ENTRADAS = {
+  // Troféu: sobe do chão e explode em confete
+  async sobe(el){
+    const [x,y,S] = centroPalco();
+    setTimeout(()=>particulas(110, x, y, {tipo:'conf', dist:S*1.1, sobe:S*.25, queda:S*.9, dur:2600}), 650);
+    await entra(el, [{transform:'translateY(70vh) scale(.4)',opacity:0},
+                     {transform:'translateY(-4vh) scale(1.08)',opacity:1,offset:.6},
+                     {transform:'translateY(1vh) scale(.98)',opacity:1,offset:.82},
+                     {transform:'translateY(0) scale(1)',opacity:1}],{duration:1150,easing:'cubic-bezier(.2,.8,.3,1)'});
+  },
+  // Medalha: cai pela fita e balança como um pêndulo, sem sair da tela
+  async pendulo(el){
+    el.style.transformOrigin = '50% 0%';
+    const [x,y,S] = centroPalco();
+    setTimeout(()=>estrelas(26, x, y, S*.65, 1400), 600);
+    await entra(el, [{transform:'translateY(-90vh) rotate(0deg)',opacity:1},
+                     {transform:'translateY(0) rotate(14deg)',opacity:1,offset:.3,easing:'ease-in-out'},
+                     {transform:'translateY(0) rotate(-9deg)',opacity:1,offset:.48,easing:'ease-in-out'},
+                     {transform:'translateY(0) rotate(5deg)',opacity:1,offset:.64,easing:'ease-in-out'},
+                     {transform:'translateY(0) rotate(-2.5deg)',opacity:1,offset:.8,easing:'ease-in-out'},
+                     {transform:'translateY(0) rotate(0deg)',opacity:1}],{duration:2100,easing:'linear'});
+    el.style.transformOrigin = '';
+  },
+  // Bomba-relógio: contagem 3-2-1 com o pavio queimando, o despertador toca (acabou o tempo!) e... BUM
+  async explode(el){
+    const [x,y,S] = centroPalco();
+    const P = (fx,fy) => [x+(fx-.5)*S, y+(fy-.5)*S];       // ponto da imagem (fração) -> tela
+    await entra(el, [{transform:'scale(.5)',opacity:0},{transform:'scale(1.06)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:550,easing:'ease-out'});
+    const t = $('timer'); t.classList.remove('zero'); t.hidden = false;
+    for (const [n,ms] of [[3,640],[2,540],[1,440]]){        // tic-tac acelerando
+      t.textContent = `00:0${n}`;
+      t.animate([{transform:'scale(1.3)'},{transform:'scale(1)'}],{duration:260,easing:'ease-out'});
+      el.animate([{transform:'rotate(0deg)'},{transform:'rotate(-2.5deg)',offset:.25},{transform:'rotate(2.5deg)',offset:.6},{transform:'rotate(0deg)'}],{duration:260});
+      particulas(5, ...P(.117,.508), {tipo:'faisca', dist:S*.16, sobe:S*.1, dur:600});
+      await sleep(ms);
+    }
+    t.textContent = '00:00'; t.classList.add('zero');
+    // despertador tocando: chacoalha rápido, ondas de som saindo dos sinos e "TRIIIM!"
+    const [bx,by] = P(.675,.34);
+    const ondas = setInterval(()=>aneis(1, bx, by, S*.32), 170);
+    trim(bx, by - S*.2, S);
+    if (navigator.vibrate) navigator.vibrate([90,40,90,40,90,40,90]);
+    const kf = []; for (let k=0;k<30;k++) kf.push({transform:`rotate(${k%2?6:-6}deg) translateY(${k%2?-3:0}px)`});
+    kf.push({transform:'rotate(0deg) translateY(0px)'});
+    el.style.transformOrigin = '50% 85%';
+    await el.animate(kf,{duration:1400,easing:'linear'}).finished;
+    el.style.transformOrigin = '';
+    clearInterval(ondas); t.hidden = true;
+    $('flash').animate([{opacity:0},{opacity:.8,offset:.12},{opacity:0}],{duration:650,easing:'ease-out'});
+    particulas(60, x, y, {tipo:'faisca', dist:S*1.2, dur:1200});
+    particulas(36, x, y, {tipo:'conf', dist:S, queda:S*.6, dur:2200});
+    tremer(16, 450);
+    await el.animate([{transform:'scale(.9)'},{transform:'scale(1.18)',offset:.3},{transform:'scale(1)'}],{duration:700,easing:'cubic-bezier(.3,1.5,.5,1)'}).finished;
+  },
+  // Alvo: aparece vazio, a flecha vem voando de fora da tela e crava no centro
+  async flecha(el){
+    const frente = $('giro').querySelector('.face');
+    frente.innerHTML = `<img src="img/alvo-vazio.webp" alt="" draggable="false"><img class="dardo" src="img/alvo-flecha.webp" alt="" draggable="false" style="opacity:0">`;
+    const dardo = frente.querySelector('.dardo');
+    try{ await Promise.all([...frente.querySelectorAll('img')].map(i=>i.decode())); }catch{}
+    const [x,y,S] = centroPalco();
+    const [tx,ty] = [x+(.444-.5)*S, y+(.549-.5)*S];          // centro do alvo, onde a ponta crava
+    const ux = .68, uy = -.73;                               // direção da flecha (da ponta para as penas)
+    await entra(el, [{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:600,easing:'ease-out'});
+    await el.animate([{transform:'scale(1)'},{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:450}).finished; // "mira"
+    dardo.style.transformOrigin = '44.4% 54.9%';
+    await entra(dardo, [{transform:`translate(${ux*S*1.5}px,${uy*S*1.5}px) scale(1.3)`,opacity:1},
+                        {transform:'translate(0px,0px) scale(1)',opacity:1}],{duration:340,easing:'cubic-bezier(.55,0,1,.9)'});
+    aneis(3, tx, ty, S*.45);
+    particulas(30, tx, ty, {tipo:'faisca', dist:S*.7, dur:850});
+    if (navigator.vibrate) navigator.vibrate(50);
+    el.animate([{transform:'translate(0,0)'},{transform:`translate(${-ux*14}px,${-uy*14}px)`,offset:.25},{transform:'translate(0,0)'}],{duration:380,easing:'ease-out'});
+    await dardo.animate([{transform:'rotate(0deg)'},{transform:'rotate(7deg)'},{transform:'rotate(-5deg)'},{transform:'rotate(3deg)'},{transform:'rotate(-1.5deg)'},{transform:'rotate(0deg)'}],
+                        {duration:650,easing:'ease-out'}).finished;
+    frente.innerHTML = frenteHTML('alvo');                   // mesma imagem final do chaveiro original
+  },
+  // Coroa: desce devagar do alto, sob raios de luz e estrelas
+  async desce(el){
+    const [x,y,S] = centroPalco();
+    estrelas(36, x, y, S*.75, 2000);
+    $('raios').animate([{opacity:.3},{opacity:1}],{duration:2200});
+    await entra(el, [{transform:'translateY(-45vh) scale(.75)',opacity:0},
+                     {transform:'translateY(-30vh) scale(.82)',opacity:1,offset:.3},
+                     {transform:'translateY(0) scale(1)',opacity:1}],{duration:2200,easing:'cubic-bezier(.2,.65,.3,1)'});
+    estrelas(14, x, y-S*.35, S*.35, 300);
+  },
+  // Controle: alguém pega o controle e joga — analógicos mexendo, combo nos botões, vibração e "start"
+  async joystick(el){
+    const frente = $('giro').querySelector('.face');
+    // analógicos recortados da imagem original (mesmo quadro); no fim a frente volta a ser o controle.webp intacto
+    frente.innerHTML = `<img src="img/controle-base.webp" alt="" draggable="false">` +
+      ['ae','ad'].map(n=>`<img class="dardo" src="img/controle-${n}.webp" alt="" draggable="false">`).join('');
+    try{ await Promise.all([...frente.querySelectorAll('img')].map(i=>i.decode())); }catch{}
+    const [ae, ad] = frente.querySelectorAll('.dardo');
+    const [x,y,S] = centroPalco();
+    const P = (fx,fy) => [x+(fx-.5)*S, y+(fy-.5)*S];
+    await entra(el, [{transform:'translateY(45vh) rotate(-28deg) scale(.5)',opacity:0},
+                     {transform:'translateY(-2vh) rotate(5deg) scale(1.05)',opacity:1,offset:.7},
+                     {transform:'translateY(0) rotate(0deg) scale(1)',opacity:1}],{duration:700,easing:'cubic-bezier(.2,.8,.3,1)'});
+    const D = 2300, m = S*.048;                             // curso do analógico (~60% do raio dele)
+    const trilha = pts => pts.map(([a,b])=>({transform:`translate(${a*m}px,${b*m}px)`}));
+    ae.animate(trilha([[0,0],[-1,0],[-1,0],[0,-1],[.7,-.7],[1,0],[.7,.7],[0,1],[-.7,.7],[-1,0],[0,0],[0,-1],[0,0]]),{duration:D,easing:'ease-in-out'});
+    ad.animate(trilha([[0,0],[0,0],[1,0],[1,-.5],[0,0],[0,1],[0,1],[0,0],[-1,0],[1,0],[0,0],[0,0]]),{duration:D,easing:'ease-in-out'});
+    el.animate([{transform:'rotate(0deg)'},{transform:'rotate(-4deg) translateX(-6px)'},{transform:'rotate(3deg) translateX(5px)'},
+                {transform:'rotate(-2deg) translateY(-4px)'},{transform:'rotate(4deg) translateX(4px)'},{transform:'rotate(0deg)'}],{duration:D,easing:'ease-in-out'});
+    // combo nos botões da direita: cada toque acende o botão e solta faíscas
+    const BOT = {Y:[.739,.384], X:[.674,.447], B:[.808,.447], A:[.741,.511]};
+    for (const [t, b] of [[350,'A'],[600,'A'],[800,'X'],[1000,'B'],[1350,'Y'],[1500,'B'],[1650,'A'],[1950,'A']]){
+      setTimeout(()=>{
+        const [fx,fy] = BOT[b], g = document.createElement('i');
+        g.className = 'aperta'; g.style.left = fx*100+'%'; g.style.top = fy*100+'%';
+        frente.appendChild(g);
+        g.animate([{transform:'translate(-50%,-50%) scale(.5)',opacity:0},{transform:'translate(-50%,-50%) scale(1.15)',opacity:1,offset:.25},
+                   {transform:'translate(-50%,-50%) scale(1.5)',opacity:0}],{duration:420,easing:'ease-out'}).finished.then(()=>g.remove());
+        particulas(5, ...P(fx,fy), {tipo:'faisca', dist:S*.14, dur:450});
+      }, t);
+    }
+    await sleep(D);
+    if (navigator.vibrate) navigator.vibrate([60,30,60,30,120]);   // rumble
+    tremer(7, 420);
+    const kf = []; for (let k=0;k<12;k++) kf.push({transform:`translate(${k%2?3:-3}px,${k%3?-2:2}px)`});
+    kf.push({transform:'translate(0px,0px)'});
+    await el.animate(kf,{duration:420,easing:'linear'}).finished;
+    particulas(30, x, y, {tipo:'faisca', dist:S*.9, dur:900});
+    await el.animate([{transform:'scale(1)'},{transform:'scale(.9)',offset:.3},{transform:'scale(1.06)',offset:.65},{transform:'scale(1)'}],{duration:550,easing:'ease-out'}).finished;
+    frente.innerHTML = frenteHTML('controle');
+  },
+};
+
+/* ---------- sequência completa ao escanear ---------- */
+async function revelar(p){
+  const nova = !album.includes(p.id);
+  const fx = $('fx'), palco = $('palco'), giro = $('giro'), texto = $('texto');
+
+  giro.innerHTML = `<div class="face">${frenteHTML(p.id)}</div><div class="face verso">${icone(p.id + '-verso')}</div>`;
+  try{ await Promise.race([Promise.all([giro.querySelector('img').decode(), document.fonts.ready]), sleep(2500)]); }catch{}
+  let li = 0;   // cada palavra fica inteira (nowrap); as letras continuam entrando uma a uma
+  $('nome').innerHTML = `${p.nome} ${p.g}`.split(' ').map(w=>`<span class="w">${[...w].map(c=>`<i style="--i:${li++}">${c}</i>`).join('')}</span>`).join(' ');
+  $('tag').textContent = nova ? 'Conquista desbloqueada' : 'Já está no seu álbum';
+  $('sub').textContent = `Peça ${String(p.i+1).padStart(2,'0')} de 06`;
+  texto.classList.remove('show');
+  palco.style.opacity = '0'; palco.style.visibility = '';
+  fx.hidden = false;
+  $('fxbg').animate([{opacity:0},{opacity:1}],{duration:450});
+  $('raios').animate([{opacity:0,transform:'scale(.5)'},{opacity:1,transform:'scale(1)'}],{duration:1400,easing:'ease-out'});
+  await sleep(420); // espera o fundo escurecer por completo
+
+  if (RM) await entra(palco, [{opacity:0},{opacity:1}], {duration:400});
+  else await ENTRADAS[p.fx](palco);
+
+  texto.classList.add('show');
+  // gira mostrando a frente por um instante a cada volta
+  const D = 2400;
+  const giroAnim = RM ? null : giro.animate([{transform:'rotateY(0deg)'},{transform:'rotateY(0deg)',offset:.3,easing:'cubic-bezier(.6,0,.4,1)'},{transform:'rotateY(360deg)'}],
+                                           {duration:D,iterations:Infinity});
+  setTimeout(()=>$('dica').classList.add('show'), 900);
+  await Promise.race([sleep(5200), new Promise(r=>fx.addEventListener('pointerup', r, {once:true}))]);
+  $('dica').classList.remove('show');
+
+  if (giroAnim){ // termina a volta atual (rápido) e para de frente
+    const t = giroAnim.currentTime, k = Math.floor(t/D), prog = t/D - k;
+    giroAnim.effect.updateTiming({iterations: prog < .3 ? t/D : k+1});
+    if (prog >= .3) giroAnim.updatePlaybackRate(2.5);
+    await giroAnim.finished; giroAnim.cancel();
+  }
+
+  // voa até o espaço da peça no álbum
+  const slot = document.querySelector(`.slot[data-id="${p.id}"]`);
+  slot.scrollIntoView({block:'center', behavior:'instant'});
+  await frame();
+  const de = palco.getBoundingClientRect(), para = slot.querySelector('.ico img').getBoundingClientRect();
+  const voo = document.createElement('div');
+  voo.className = 'voo'; voo.innerHTML = icone(p.id);
+  Object.assign(voo.style, {left:de.left+'px', top:de.top+'px', width:de.width+'px', height:de.height+'px'});
+  document.body.appendChild(voo);
+  palco.style.visibility = 'hidden';
+  const s = para.width/de.width, dx = para.left-de.left, dy = para.top-de.top;
+  const sair = {duration:650, delay:200, fill:'forwards', easing:'ease-in'};
+  $('fxbg').animate([{opacity:1},{opacity:0}], sair);
+  $('raios').animate([{opacity:1},{opacity:0}], sair);
+  $('halo').animate([{opacity:1},{opacity:0}], {...sair, delay:0});
+  texto.animate([{opacity:1},{opacity:0,transform:'translateY(20px)'}], {...sair, delay:0, duration:300});
+  await voo.animate([
+    {transform:'translate(0px,0px) scale(1) rotate(0deg)'},
+    {transform:`translate(${dx*.45}px,${dy*.45 - 70}px) scale(${(1+s)/2*.85}) rotate(-12deg)`, offset:.5},
+    {transform:`translate(${dx}px,${dy}px) scale(${s}) rotate(0deg)`}
+  ],{duration:RM?500:1100, easing:'cubic-bezier(.55,0,.25,1)', fill:'forwards'}).finished;
+
+  // encaixe
+  if (nova){ album.push(p.id); salvar(); slot.classList.replace('locked','got'); }
+  slot.classList.remove('land','ping'); void slot.offsetWidth;
+  slot.classList.add(nova ? 'land' : 'ping');
+  const cx = para.left+para.width/2, cy = para.top+para.height/2;
+  aneis(2, cx, cy, para.width*1.1);
+  particulas(26, cx, cy, {tipo:'faisca', dist:para.width*1.3, dur:900});
+  voo.remove();
+  fx.hidden = true;
+  fx.getAnimations({subtree:true}).forEach(a=>a.cancel());
+  if (navigator.vibrate) navigator.vibrate(nova ? [40,60,80] : 30);
+  if (nova){
+    await atualizarPlacar(true);
+    if (album.length === 6){ await sleep(700); await parabens(); }
+  }
+}
+
+/* ---------- tela cheia de parabéns ---------- */
+async function parabens(){
+  const tela = $('parabens'), titulo = $('pbTitulo');
+  titulo.innerHTML = [...'Parabéns!'].map(c=>`<span>${c}</span>`).join('');
+  $('pbPecas').innerHTML = PECAS.map(p=>icone(p.id)).join('');
+  $('pbDica').classList.remove('show');
+  tela.hidden = false;
+  if (navigator.vibrate) navigator.vibrate([60,80,60,80,200]);
+  tela.animate([{opacity:0},{opacity:1}],{duration:500});
+  tela.querySelector('small').animate([{opacity:0,letterSpacing:'1em'},{opacity:1,letterSpacing:'.35em'}],{duration:900,easing:'ease-out',fill:'backwards'});
+  [...titulo.children].forEach((l,i)=>{
+    l.animate([{transform:'translateY(-120vh) rotate(-25deg)',opacity:1},
+               {transform:'translateY(.08em) rotate(4deg) scaleY(.85)',offset:.7},
+               {transform:'translateY(0) rotate(0deg) scaleY(1)'}],
+              {duration:900, delay:300+i*90, easing:'cubic-bezier(.3,.9,.4,1.1)', fill:'backwards'})
+     .finished.then(()=>{ if (!RM) l.animate([{transform:'translateY(0)'},{transform:'translateY(-.06em)'},{transform:'translateY(0)'}],{duration:1800,delay:i*120,iterations:Infinity,easing:'ease-in-out'}); });
+  });
+  tela.querySelector('p').animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:700,delay:1400,fill:'backwards'});
+  [...$('pbPecas').children].forEach((img,i)=>img.animate(
+    [{transform:'scale(0) rotate(-180deg)',opacity:0},{transform:'scale(1.25) rotate(10deg)',opacity:1,offset:.7},{transform:'scale(1) rotate(0)',opacity:1}],
+    {duration:650, delay:1800+i*140, easing:'ease-out', fill:'backwards'}));
+
+  // chuva de confete enquanto a tela estiver aberta
+  const W = innerWidth, H = innerHeight;
+  const solta = () => { for (let k=0;k<3;k++) particulas(14, rnd(0,W), -20, {tipo:'conf', dist:W*.18, queda:H*1.15, dur:3400}); };
+  setTimeout(()=>{ const r = titulo.getBoundingClientRect(); particulas(90, W/2, r.top+r.height/2, {tipo:'conf', dist:Math.max(W,H)*.6, queda:H*.4, dur:2800}); }, 1200);
+  const chuva = setInterval(solta, 650); solta();
+
+  await sleep(2800);
+  $('pbDica').classList.add('show');
+  await new Promise(r=>tela.addEventListener('pointerup', r, {once:true}));
+  clearInterval(chuva);
+  await tela.animate([{opacity:1},{opacity:0}],{duration:450,fill:'forwards'}).finished;
+  tela.hidden = true; tela.getAnimations({subtree:true}).forEach(a=>a.cancel());
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------- início ---------- */
+// Painel de demonstração: só aparece quando a página está embutida (link de visualização) ou com #demo.
+// Quem abre pelo NFC vê o site normal, sem os botões.
+const DEMO = window.self !== window.top || /demo/.test(location.search + location.hash);
+const zerar = () => { album = []; salvar(); desenharAlbum(); atualizarPlacar(false); };
+$('reset').onclick = () => { if (DEMO || confirm('Apagar todas as peças registradas neste celular?')) zerar(); };
+desenharAlbum(); atualizarPlacar(false);
+
+if (DEMO){
+  const painel = $('demo');
+  painel.querySelector('.demo-row').innerHTML =
+      PECAS.map(p=>`<button type="button" data-p="${p.id}">${icone(p.id)}${p.nome}</button>`).join('')
+    + `<button type="button" class="esp" data-acao="completo">Álbum completo</button>`
+    + `<button type="button" class="leve" data-acao="zerar">Zerar álbum</button>`;
+  painel.hidden = false; document.body.classList.add('com-demo');
+  let ocupado = false;
+  painel.onclick = async e => {
+    const b = e.target.closest('button'); if (!b || ocupado) return;
+    ocupado = true; painel.classList.add('ocupado');
+    try{
+      if (b.dataset.p){ // tira a peça do álbum (se já estiver) e mostra ela sendo registrada
+        album = album.filter(id=>id!==b.dataset.p); salvar(); desenharAlbum(); atualizarPlacar(false);
+        await revelar(BY[b.dataset.p]);
+      } else if (b.dataset.acao === 'completo'){ // deixa 5 no álbum e registra a 6ª
+        const ultima = PECAS[Math.floor(Math.random()*6)].id;
+        album = PECAS.map(p=>p.id).filter(id=>id!==ultima); salvar(); desenharAlbum(); atualizarPlacar(false);
+        await revelar(BY[ultima]);
+      } else zerar();
+    } finally { ocupado = false; painel.classList.remove('ocupado'); }
+  };
+}
+
+const q = (new URLSearchParams(location.search).get('p') || new URLSearchParams(location.hash.slice(1)).get('p') || '').toLowerCase();
+if (BY[q]){
+  history.replaceState(null, '', location.pathname); // recarregar a página não repete a animação
+  revelar(BY[q]);
+}
+</script>
+</body>
+</html>
